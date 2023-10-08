@@ -77,6 +77,11 @@ impl Deck {
             self.merge_shuffle(times);
         }
     }
+
+    fn sort(&mut self) {
+        self.0.sort_by(|a, b| a.value.cmp(&b.value));
+        self.0.sort_by(|a, b| a.suit.weight().cmp(&b.suit.weight()))
+    }
 }
 
 impl fmt::Display for Deck {
@@ -122,6 +127,17 @@ enum Suit {
     Club,
 }
 
+impl Suit {
+    fn weight(&self) -> usize {
+        match self {
+            Suit::Heart => 1,
+            Suit::Spade => 2,
+            Suit::Diamond => 3,
+            Suit::Club => 4,
+        }
+    }
+}
+
 impl fmt::Display for Suit {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let icon = match self {
@@ -135,8 +151,30 @@ impl fmt::Display for Suit {
     }
 }
 
+enum Command {
+    Quit,
+    Sort,
+    Shuffle(isize),
+}
+
+impl Command {
+    fn from(str: String) -> Command {
+        if str == "q".to_string() {
+            return Command::Quit;
+        }
+
+        if str == "s".to_string() {
+            Command::Sort
+        } else {
+            let num = str.parse().expect("Cannot parse string to number");
+
+            Command::Shuffle(num)
+        }
+    }
+}
+
 fn prompt() -> String {
-    print!("Write times to shuffle or 'q' to exit\n");
+    print!("Write times to shuffle or 's' to sort or 'q' to exit\n");
     print!("> ");
 
     std::io::stdout().flush().unwrap();
@@ -147,22 +185,21 @@ fn prompt() -> String {
 
     str.trim().to_string()
 }
+
 fn main() {
     let mut deck = Deck::new();
 
     println!("Initial: \n{}\n", deck);
 
     loop {
-        let com = prompt();
+        let com = Command::from(prompt());
 
-        if com == "q".to_string() {
-            break;
-        }
+        match com {
+            Command::Quit => break,
+            Command::Sort => deck.sort(),
+            Command::Shuffle(times) => deck.shuffle(times),
+        };
 
-        let times: isize = com.parse().expect("Cannot parse string to number");
-
-        deck.shuffle(times);
-
-        println!("After shuffle: \n{}\n", deck);
+        println!("Result: \n{}\n", deck);
     }
 }
