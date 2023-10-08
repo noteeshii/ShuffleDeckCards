@@ -22,14 +22,14 @@ impl Deck {
     fn build_suite(suit: Suit) -> Vec<Card> {
         let mut cards = Vec::<Card>::with_capacity(CARDS_IN_SUITE);
 
-        for n in 1..CARDS_IN_SUITE {
-            cards.push(Card::new(suit, n as i8));
+        for n in 0..CARDS_IN_SUITE {
+            cards.push(Card::new(suit, (n + 1) as i8));
         }
 
         cards
     }
 
-    fn simple_shuffle(&mut self, times: usize) {
+    fn simple_shuffle(&mut self, times: isize) {
         let mut rng = rand::thread_rng();
 
         for _ in 0..times {
@@ -38,6 +38,30 @@ impl Deck {
 
             self.0.swap(first_idx, second_idx);
         }
+    }
+
+    fn merge_shuffle(&mut self, times: isize) {
+        if times == 0 {
+            return;
+        }
+
+        let half_cards = CARDS_IN_DECK / 2;
+
+        let mut rng = rand::thread_rng();
+
+        for idx in 0..half_cards {
+            let corr = rng.gen_range(-1.0..2.0) as usize;
+
+            let r_card = self.0.remove(half_cards + idx);
+
+            self.0.insert(idx * 2 + corr, r_card)
+        }
+
+        if times == 1 {
+            return;
+        }
+
+        self.merge_shuffle(times - 1);
     }
 }
 
@@ -102,7 +126,7 @@ fn main() {
 
     println!("Initial: \n{}\n", deck);
 
-    deck.simple_shuffle(10);
+    deck.merge_shuffle(2);
 
-    println!("After 10 suffles: \n{}\n", deck);
+    println!("After suffle: \n{}\n", deck);
 }
