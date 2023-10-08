@@ -41,27 +41,41 @@ impl Deck {
     }
 
     fn merge_shuffle(&mut self, times: isize) {
-        if times == 0 {
-            return;
-        }
-
-        let half_cards = CARDS_IN_DECK / 2;
-
         let mut rng = rand::thread_rng();
 
-        for idx in 0..half_cards {
-            let corr = rng.gen_range(-1.0..2.0) as usize;
+        for _ in 0..times {
+            let half_cards = CARDS_IN_DECK / 2;
 
-            let r_card = self.0.remove(half_cards + idx);
+            for idx in 0..half_cards {
+                let corr = rng.gen_range(-1.0..2.0) as usize;
 
-            self.0.insert(idx * 2 + corr, r_card)
+                let r_card = self.0.remove(half_cards + idx);
+
+                self.0.insert(idx * 2 + corr, r_card)
+            }
         }
+    }
 
-        if times == 1 {
-            return;
+    fn queue_shuffle(&mut self, times: isize) {
+        let mut rng = rand::thread_rng();
+
+        for _ in 0..times {
+            let cards = rng.gen_range(1..11);
+
+            for _ in 0..cards {
+                let card = self.0.remove(0);
+
+                self.0.push(card);
+            }
         }
+    }
 
-        self.merge_shuffle(times - 1);
+    fn shuffle(&mut self, times: isize) {
+        for _ in 0..times {
+            self.simple_shuffle(times);
+            self.queue_shuffle(times);
+            self.merge_shuffle(times);
+        }
     }
 }
 
@@ -126,7 +140,7 @@ fn main() {
 
     println!("Initial: \n{}\n", deck);
 
-    deck.merge_shuffle(2);
+    deck.shuffle(5);
 
     println!("After suffle: \n{}\n", deck);
 }
