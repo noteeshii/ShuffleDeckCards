@@ -1,5 +1,5 @@
 use rand::Rng;
-use std::fmt;
+use std::{fmt, io::Write};
 
 const CARDS_IN_SUITE: usize = 13;
 
@@ -135,12 +135,34 @@ impl fmt::Display for Suit {
     }
 }
 
+fn prompt() -> String {
+    print!("Write times to shuffle or 'q' to exit\n");
+    print!("> ");
+
+    std::io::stdout().flush().unwrap();
+
+    let mut str = String::new();
+
+    std::io::stdin().read_line(&mut str).unwrap();
+
+    str.trim().to_string()
+}
 fn main() {
     let mut deck = Deck::new();
 
     println!("Initial: \n{}\n", deck);
 
-    deck.shuffle(5);
+    loop {
+        let com = prompt();
 
-    println!("After suffle: \n{}\n", deck);
+        if com == "q".to_string() {
+            break;
+        }
+
+        let times: isize = com.parse().expect("Cannot parse string to number");
+
+        deck.shuffle(times);
+
+        println!("After shuffle: \n{}\n", deck);
+    }
 }
