@@ -1,3 +1,4 @@
+use rand::Rng;
 use std::fmt;
 
 const CARDS_IN_SUITE: usize = 13;
@@ -26,6 +27,17 @@ impl Deck {
         }
 
         cards
+    }
+
+    fn simple_shuffle(&mut self, times: usize) {
+        let mut rng = rand::thread_rng();
+
+        for _ in 0..times {
+            let first_idx = rng.gen_range(0..self.0.len());
+            let second_idx = rng.gen_range(0..self.0.len());
+
+            self.0.swap(first_idx, second_idx);
+        }
     }
 }
 
@@ -88,5 +100,9 @@ impl fmt::Display for Suit {
 fn main() {
     let mut deck = Deck::new();
 
-    println!("{}", deck);
+    println!("Initial: \n{}\n", deck);
+
+    deck.simple_shuffle(10);
+
+    println!("After 10 suffles: \n{}\n", deck);
 }
